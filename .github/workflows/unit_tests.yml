@@ -54,13 +54,3 @@ jobs:
       - name: Check coverage
         run: |
           coverage report --fail-under=85
-
-      - name: Upload report to Azure
-        uses: LanceMcCarthy/Action-AzureBlobUpload@v2
-        with:
-          source_folder: 'test_results'
-          destination_folder: '${{ env.output_folder }}'
-          connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          container_name: 'pathways_bench-package'
-          clean_destination_folder: false
-          delete_if_exists: false
