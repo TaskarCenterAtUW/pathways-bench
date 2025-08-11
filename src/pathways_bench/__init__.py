@@ -25,9 +25,9 @@ class PathwaysBench:
         return __version__
 
 
-    def tessellate_area(self, filepath: str, output_path=None):
+    def tessellate_area(self, filepath: str):
         tess = Tessellate(filepath=filepath, proj=self.PROJ, debug=self.debug)
-        stored_file_path = tess.area(out_path=output_path)
+        stored_file_path = tess.area()
         self.tip_file = stored_file_path
         return stored_file_path
 
@@ -35,7 +35,7 @@ class PathwaysBench:
     def stats(self, threshold=5, buffer_size=5):
         check_file_exists(filepath=self.prediction_file)
 
-        self.tessellate_area(filepath=self.gt_file, output_path=self.output)
+        self.tessellate_area(filepath=self.gt_file)
 
         ev = GeoStatsEvaluator(
             proj=self.PROJ,

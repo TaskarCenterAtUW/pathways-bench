@@ -6,7 +6,7 @@ ASSETS_DIR = os.path.join(PARENT_DIR, f'tests/assets')
 GT_DIR = os.path.join(ASSETS_DIR, 'gt')
 AI_DIR = os.path.join(ASSETS_DIR, 'predictions_v8')
 
-CITY = 'yakima'
+CITY = 'auburn'
 GT_FILE_PATH = f'{GT_DIR}/{CITY}.edges.geojson'
 AI_FILE_PATH = f'{AI_DIR}/{CITY}.graph.edges.OSW.geojson'
 
