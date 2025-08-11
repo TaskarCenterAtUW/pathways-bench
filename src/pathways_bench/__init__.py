@@ -26,7 +26,7 @@ class PathwaysBench:
 
 
     def tessellate_area(self, filepath: str):
-        tess = Tessellate(filepath=filepath, proj=self.PROJ, debug=self.debug)
+        tess = Tessellate(filepath=filepath, proj=self.PROJ, debug=self.debug, output=self.output)
         stored_file_path = tess.area()
         self.tip_file = stored_file_path
         return stored_file_path
