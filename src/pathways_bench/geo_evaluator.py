@@ -12,7 +12,7 @@ import pandas as pd
 from shapely import LineString, MultiLineString, MultiPolygon, Point, Polygon
 
 # helpers
-from .helpers import compute_aggregate_f1, compute_tra_jaccard
+from .helpers import MetricsHelper
 
 
 GeoFrameOrPath = Union[str, os.PathLike, gpd.GeoDataFrame]
@@ -50,8 +50,11 @@ class GeoStatsEvaluator:
         num_partitions: int = 32,
         curb_pred_filter: Tuple[str, str] = ("ext:node_type", "curb"),
         curb_gt_filter: Tuple[str, str] = ("barrier", "kerb"),
-        output: str | os.PathLike | None = None
+        output: str | os.PathLike | None = None,
+        use_pygeos: bool = False,
     ) -> None:
+        if not use_pygeos:
+            os.environ["USE_PYGEOS"] = "0"
         self.proj = proj
         self.precision = precision
         self.buffer_size = buffer_size
@@ -62,6 +65,7 @@ class GeoStatsEvaluator:
         self.output_dir = Path(output) if output else None
         if self.output_dir:
             self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.helper = MetricsHelper()
 
     # =========================
     # Public, parameter-based API
@@ -268,13 +272,13 @@ class GeoStatsEvaluator:
         self, pred_stats: gpd.GeoDataFrame, gt_stats: gpd.GeoDataFrame
     ) -> Tuple[float, float, float, float]:
         """(traversability, precision, recall, f1)"""
-        tra = compute_tra_jaccard(pred_stats, gt_stats)
-        precision, recall, f1 = compute_aggregate_f1(pred_stats)
+        tra = self.helper.compute_tra_jaccard(pred_stats, gt_stats)
+        precision, recall, f1 = self.helper.compute_aggregate_f1(pred_stats)
         return tra, precision, recall, f1
 
     def summarise_node_stats(self, node_stats: gpd.GeoDataFrame) -> Tuple[float, float, float]:
         """(precision, recall, f1)"""
-        return compute_aggregate_f1(node_stats)
+        return self.helper.compute_aggregate_f1(node_stats)
 
     # =========================
     # Internal helpers

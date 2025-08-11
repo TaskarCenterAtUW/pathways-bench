@@ -1,5 +1,4 @@
 import os
-os.environ['USE_PYGEOS'] = '0'
 
 from pathlib import Path
 from shapely.geometry import Polygon
@@ -11,7 +10,9 @@ from .logger import get_logger
 
 
 class Tessellate:
-    def __init__(self, filepath: str, proj='epsg:26910', debug=False, output: str = None):
+    def __init__(self, filepath: str, proj='epsg:26910', debug=False, output: str = None, use_pygeos: bool = False):
+        if not use_pygeos:
+            os.environ["USE_PYGEOS"] = "0"
         self.filepath = filepath
         self.PROJ = proj
         self.logger = get_logger(self.__class__.__name__, debug)

@@ -25,6 +25,7 @@ def evaluate_test():
 
 
 if __name__ == '__main__':
+
     evaluate_test()
     # print(f'{os.path.join(AI_OUT_DIR, AI_FILE)}')
     # print(AREA_FILE)

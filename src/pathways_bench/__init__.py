@@ -1,8 +1,9 @@
 from .tessellate import Tessellate
 from .version import __version__
 
-from .helpers import check_file_exists
+from .helpers import MetricsHelper
 from .geo_evaluator import GeoStatsEvaluator
+from .stats import ScoreReporter
 
 
 class PathwaysBench:
@@ -11,7 +12,8 @@ class PathwaysBench:
     def __init__(self, gt_file=None, prediction_file=None, output=None, proj='epsg:26910', debug=False):
         self.PROJ = proj
         self.debug = debug
-        is_gt_file = check_file_exists(filepath=gt_file)
+        self.helper = MetricsHelper()
+        is_gt_file = self.helper.check_file_exists(filepath=gt_file)
         if is_gt_file:
             self.gt_file = gt_file
 
@@ -19,6 +21,8 @@ class PathwaysBench:
         self.output = output
 
         self.tip_file = None
+        self.use_pygeos = True
+
 
     @property
     def version(self):
@@ -26,14 +30,14 @@ class PathwaysBench:
 
 
     def tessellate_area(self, filepath: str):
-        tess = Tessellate(filepath=filepath, proj=self.PROJ, debug=self.debug, output=self.output)
+        tess = Tessellate(filepath=filepath, proj=self.PROJ, debug=self.debug, output=self.output, use_pygeos=self.use_pygeos)
         stored_file_path = tess.area()
         self.tip_file = stored_file_path
         return stored_file_path
 
 
     def stats(self, threshold=5, buffer_size=5):
-        check_file_exists(filepath=self.prediction_file)
+        self.helper.check_file_exists(filepath=self.prediction_file)
 
         self.tessellate_area(filepath=self.gt_file)
 
@@ -41,11 +45,23 @@ class PathwaysBench:
             proj=self.PROJ,
             e_threshold=threshold,
             buffer_size=buffer_size,
-            output=self.output
+            output=self.output,
+            use_pygeos=self.use_pygeos
         )
         res = ev.run(
             tile=self.tip_file,
             edges=self.prediction_file,
             gt_edges=self.gt_file
         )
-        return res
+        saved_files = res['saved_paths']
+
+        statistic = ScoreReporter(
+            pred_path=saved_files['pred_edge_stats'],
+            gt_path=saved_files['gt_edge_stats'],
+            use_pygeos=self.use_pygeos
+        )
+        result = statistic.run()
+        return result
+
+
+
