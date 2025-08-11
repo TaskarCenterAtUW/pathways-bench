@@ -11,10 +11,13 @@ from .logger import get_logger
 
 
 class Tessellate:
-    def __init__(self, filepath: str, proj='epsg:26910', debug=False):
+    def __init__(self, filepath: str, proj='epsg:26910', debug=False, output: str = None):
         self.filepath = filepath
         self.PROJ = proj
         self.logger = get_logger(self.__class__.__name__, debug)
+        self.output_dir = Path(output) if output else None
+        if self.output_dir:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
 
         if not os.path.exists(filepath):
             self.logger.error(f"File not found: {filepath}")
@@ -56,13 +59,16 @@ class Tessellate:
         self.tile_gdf = clipped.to_crs(self.PROJ)
         self.logger.debug('Voronoi diagram created and projected.')
 
-    def area(self, out_path: str = None):
+    def area(self):
         self.logger.info('Starting tessellation process...')
         self._create_osmnx_graph()
         self._create_voronoi_diagram()
 
-        if out_path is None:
+        if self.output_dir is None:
             out_path = self.filepath.replace('.geojson', '_tip.geojson')
+        else:
+            filename = self.filepath.split('/')[-1].replace('.geojson','_tip.geojson')
+            out_path= Path(self.output_dir) / filename
 
         self.logger.info(f'Saving output to {out_path}')
         self.tile_gdf.to_file(out_path, driver='GeoJSON')

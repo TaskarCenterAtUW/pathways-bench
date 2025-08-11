@@ -5,3 +5,4 @@ networkx==3.2.1
 shapely==2.0.3
 fiona==1.9.6
 coverage
+dask_geopandas
