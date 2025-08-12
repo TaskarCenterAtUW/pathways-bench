@@ -7,7 +7,7 @@ from typing import Iterable, Tuple, Any
 import geopandas as gpd
 import numpy as np
 
-CONNECTED_PAIRS_COL = "connected_pairs"
+CONNECTED_PAIRS_COL = 'connected_pairs'
 
 
 class MetricsHelper:

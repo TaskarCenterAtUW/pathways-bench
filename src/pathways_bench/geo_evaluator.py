@@ -48,13 +48,13 @@ class GeoStatsEvaluator:
         buffer_size: float = 5.0,
         e_threshold: float = 5.0,
         num_partitions: int = 32,
-        curb_pred_filter: Tuple[str, str] = ("ext:node_type", "curb"),
-        curb_gt_filter: Tuple[str, str] = ("barrier", "kerb"),
+        curb_pred_filter: Tuple[str, str] = ('ext:node_type', 'curb'),
+        curb_gt_filter: Tuple[str, str] = ('barrier', 'kerb'),
         output: str | os.PathLike | None = None,
         use_pygeos: bool = False,
     ) -> None:
         if not use_pygeos:
-            os.environ["USE_PYGEOS"] = "0"
+            os.environ['USE_PYGEOS'] = '0'
         self.proj = proj
         self.precision = precision
         self.buffer_size = buffer_size
@@ -94,26 +94,26 @@ class GeoStatsEvaluator:
             save_paths = {}
             # If output_dir exists, put everything there
             if self.output_dir:
-                base_pred = Path(edges).stem if isinstance(edges, (str, os.PathLike)) else "pred"
-                base_gt = Path(gt_edges).stem if isinstance(gt_edges, (str, os.PathLike)) else "gt"
-                save_paths["pred_edge_stats"] = str(self.output_dir / f"{base_pred}_stats.geojson")
-                save_paths["gt_edge_stats"] = str(self.output_dir / f"{base_gt}_gt_stats.geojson")
+                base_pred = Path(edges).stem if isinstance(edges, (str, os.PathLike)) else 'pred'
+                base_gt = Path(gt_edges).stem if isinstance(gt_edges, (str, os.PathLike)) else 'gt'
+                save_paths['pred_edge_stats'] = str(self.output_dir / f'{base_pred}_stats.geojson')
+                save_paths['gt_edge_stats'] = str(self.output_dir / f'{base_gt}_gt_stats.geojson')
                 if nodes is not None:
-                    base_nodes = Path(nodes).stem if isinstance(nodes, (str, os.PathLike)) else "curbs"
-                    save_paths["curb_stats"] = str(self.output_dir / f"{base_nodes}_curb_stats.geojson")
-                    save_paths["curb_link_stats"] = str(self.output_dir / f"{base_nodes}_curb_link_stats.geojson")
+                    base_nodes = Path(nodes).stem if isinstance(nodes, (str, os.PathLike)) else 'curbs'
+                    save_paths['curb_stats'] = str(self.output_dir / f'{base_nodes}_curb_stats.geojson')
+                    save_paths['curb_link_stats'] = str(self.output_dir / f'{base_nodes}_curb_link_stats.geojson')
             else:
                 # Fall back to original-file-based paths
                 if isinstance(edges, (str, os.PathLike)):
                     base = Path(edges)
-                    save_paths["pred_edge_stats"] = str(base.with_name(f"{base.stem}_stats.geojson"))
+                    save_paths['pred_edge_stats'] = str(base.with_name(f'{base.stem}_stats.geojson'))
                 if isinstance(gt_edges, (str, os.PathLike)):
                     base = Path(gt_edges)
-                    save_paths["gt_edge_stats"] = str(base.with_name(f"{base.stem}_gt_stats.geojson"))
+                    save_paths['gt_edge_stats'] = str(base.with_name(f'{base.stem}_gt_stats.geojson'))
                 if nodes is not None and isinstance(nodes, (str, os.PathLike)):
                     base = Path(nodes)
-                    save_paths["curb_stats"] = str(base.with_name(f"{base.stem}_curb_stats.geojson"))
-                    save_paths["curb_link_stats"] = str(base.with_name(f"{base.stem}_curb_link_stats.geojson"))
+                    save_paths['curb_stats'] = str(base.with_name(f'{base.stem}_curb_stats.geojson'))
+                    save_paths['curb_link_stats'] = str(base.with_name(f'{base.stem}_curb_link_stats.geojson'))
 
         tile_gdf = self._coerce_gdf(tile)
         edges_gdf = self._coerce_gdf(edges)
@@ -124,23 +124,23 @@ class GeoStatsEvaluator:
         gt_edge_stats = self.evaluate_edges(tile_gdf, gt_edges_gdf, gt_edges_gdf)
 
         saved_paths: Dict[str, str] = {}
-        if path := save_paths.get("pred_edge_stats"):
-            pred_edge_stats.to_file(path, driver="GeoJSON")
-            saved_paths["pred_edge_stats"] = path
-        if path := save_paths.get("gt_edge_stats"):
-            gt_edge_stats.to_file(path, driver="GeoJSON")
-            saved_paths["gt_edge_stats"] = path
+        if path := save_paths.get('pred_edge_stats'):
+            pred_edge_stats.to_file(path, driver='GeoJSON')
+            saved_paths['pred_edge_stats'] = path
+        if path := save_paths.get('gt_edge_stats'):
+            gt_edge_stats.to_file(path, driver='GeoJSON')
+            saved_paths['gt_edge_stats'] = path
 
         tra, p, r, f1 = self.summarise_edge_stats(pred_edge_stats, gt_edge_stats)
 
         out: Dict[str, object] = {
-            "pred_edge_stats": pred_edge_stats,
-            "gt_edge_stats": gt_edge_stats,
-            "edge_summary": {
-                "traversability": tra,
-                "precision": p,
-                "recall": r,
-                "f1": f1,
+            'pred_edge_stats': pred_edge_stats,
+            'gt_edge_stats': gt_edge_stats,
+            'edge_summary': {
+                'traversability': tra,
+                'precision': p,
+                'recall': r,
+                'f1': f1,
             },
         }
 
@@ -154,19 +154,19 @@ class GeoStatsEvaluator:
             )
 
             # Save node stats if paths provided
-            if path := save_paths.get("curb_stats"):
-                curb_stats.to_file(path, driver="GeoJSON")
-                saved_paths["curb_stats"] = path
-            if path := save_paths.get("curb_link_stats"):
-                curb_link_stats.to_file(path, driver="GeoJSON")
-                saved_paths["curb_link_stats"] = path
+            if path := save_paths.get('curb_stats'):
+                curb_stats.to_file(path, driver='GeoJSON')
+                saved_paths['curb_stats'] = path
+            if path := save_paths.get('curb_link_stats'):
+                curb_link_stats.to_file(path, driver='GeoJSON')
+                saved_paths['curb_link_stats'] = path
 
             out.update(
                 {
-                    "curb_stats": curb_stats,
-                    "curb_link_stats": curb_link_stats,
-                    "curb_summary": self._summary_dict(*self.summarise_node_stats(curb_stats)),
-                    "curb_link_summary": self._summary_dict(
+                    'curb_stats': curb_stats,
+                    'curb_link_stats': curb_link_stats,
+                    'curb_summary': self._summary_dict(*self.summarise_node_stats(curb_stats)),
+                    'curb_link_summary': self._summary_dict(
                         *self.summarise_node_stats(curb_link_stats)
                     ),
                 }
@@ -174,7 +174,7 @@ class GeoStatsEvaluator:
 
         # Include saved paths (only if something was saved)
         if saved_paths:
-            out["saved_paths"] = saved_paths
+            out['saved_paths'] = saved_paths
 
         return out
 
@@ -192,14 +192,14 @@ class GeoStatsEvaluator:
         df_dask = dask_geopandas.from_geopandas(tile_gdf, npartitions=self.num_partitions)
         meta_edges = gpd.GeoDataFrame(
             {
-                "total_edges": pd.Series(dtype="float64"),
-                "connect_edges": pd.Series(dtype="float64"),
-                "connected_pairs": pd.Series(dtype="object"),
-                "tp": pd.Series(dtype="float64"),
-                "fp": pd.Series(dtype="float64"),
-                "fn": pd.Series(dtype="float64"),
+                'total_edges': pd.Series(dtype='float64'),
+                'connect_edges': pd.Series(dtype='float64'),
+                'connected_pairs': pd.Series(dtype='object'),
+                'tp': pd.Series(dtype='float64'),
+                'fp': pd.Series(dtype='float64'),
+                'fn': pd.Series(dtype='float64'),
             },
-            geometry=gpd.GeoSeries([], dtype="geometry"),
+            geometry=gpd.GeoSeries([], dtype='geometry'),
             crs=tile_gdf.crs,
         )
         return df_dask.apply(
@@ -208,7 +208,7 @@ class GeoStatsEvaluator:
             meta=meta_edges,
             gdf=edges_gdf,
             gdf_gt=gt_edges_gdf,
-        ).compute(scheduler="multiprocessing")
+        ).compute(scheduler='multiprocessing')
 
     def evaluate_nodes(
         self,
@@ -224,11 +224,11 @@ class GeoStatsEvaluator:
         df_dask = dask_geopandas.from_geopandas(tile_gdf, npartitions=self.num_partitions)
         meta_nodes = gpd.GeoDataFrame(
             {
-                "tp": pd.Series(dtype="float64"),
-                "fp": pd.Series(dtype="float64"),
-                "fn": pd.Series(dtype="float64"),
+                'tp': pd.Series(dtype='float64'),
+                'fp': pd.Series(dtype='float64'),
+                'fn': pd.Series(dtype='float64'),
             },
-            geometry=gpd.GeoSeries([], dtype="geometry"),
+            geometry=gpd.GeoSeries([], dtype='geometry'),
             crs=tile_gdf.crs,
         )
         return df_dask.apply(
@@ -237,7 +237,7 @@ class GeoStatsEvaluator:
             meta=meta_nodes,
             gdf=nodes_gdf,
             gdf_gt=gt_nodes_gdf,
-        ).compute(scheduler="multiprocessing")
+        ).compute(scheduler='multiprocessing')
 
     def evaluate_curbs_and_links(
         self,
@@ -293,7 +293,7 @@ class GeoStatsEvaluator:
             gdf = obj
         else:
             raise TypeError(
-                f"Expected str | os.PathLike | GeoDataFrame, got {type(obj).__name__}"
+                f'Expected str | os.PathLike | GeoDataFrame, got {type(obj).__name__}'
             )
 
         if gdf.crs is None:
@@ -372,15 +372,15 @@ class GeoStatsEvaluator:
         if isinstance(line, LineString):
             angle = angle_for_linestring(line)
             if angle is None:
-                raise ValueError("LineString must have at least two coordinates")
+                raise ValueError('LineString must have at least two coordinates')
             return angle
         if isinstance(line, MultiLineString):
             angles = [angle_for_linestring(part) for part in line.geoms]
             angles = [a for a in angles if a is not None]
             if not angles:
-                raise ValueError("MultiLineString has no valid LineStrings")
+                raise ValueError('MultiLineString has no valid LineStrings')
             return float(np.mean(angles))
-        raise TypeError(f"Unsupported geometry type: {type(line)}")
+        raise TypeError(f'Unsupported geometry type: {type(line)}')
 
     def _compute_f1(self, pred: gpd.GeoDataFrame, gt: gpd.GeoDataFrame) -> Tuple[int, int]:
         angle_thres = 30
@@ -395,27 +395,27 @@ class GeoStatsEvaluator:
                 inter = gt.overlay(
                     gpd.GeoDataFrame(
                         row.to_frame().T.assign(geometry=geom.buffer(self.buffer_size)),
-                        geometry="geometry",
+                        geometry='geometry',
                         crs=pred.crs,
                     ),
                     keep_geom_type=True,
-                    how="intersection",
+                    how='intersection',
                 )
-                inter["angle"] = inter["geometry"].apply(self._compute_angle)
-                inter = inter[inter["angle"].apply(lambda a: abs(a - pred_angle) < angle_thres)]
+                inter['angle'] = inter['geometry'].apply(self._compute_angle)
+                inter = inter[inter['angle'].apply(lambda a: abs(a - pred_angle) < angle_thres)]
 
                 split_pts = [geom.interpolate(i / num_splits, normalized=True) for i in range(1, num_splits)]
                 if not inter.empty:
                     union_geom = inter.unary_union
                     distances = [pt.distance(union_geom) for pt in split_pts]
                     near = [d for d in distances if d <= match_thres]
-                    avg_d = np.average(near) if near else 99999
+                    avg_d = np.average(near) if near else 1e5
                     tp += 1 if avg_d < self.e_threshold else 0
                     fp += 0 if avg_d < self.e_threshold else 1
                 else:
                     fp += 1
             except Exception:
-                fp += 1
+                continue
         return tp, fp
 
     def _compute_f1_point_distance(
@@ -427,7 +427,7 @@ class GeoStatsEvaluator:
             try:
                 pred_pt = row.geometry
                 gt = gt.assign(dist=gt.geometry.distance(pred_pt))
-                nearest = float(gt["dist"].min())
+                nearest = float(gt['dist'].min())
                 tp += 1 if nearest <= dist_thres else 0
                 fp += 0 if nearest <= dist_thres else 1
             except Exception:
@@ -441,19 +441,19 @@ class GeoStatsEvaluator:
         undirected_g = nx.Graph(G)
         try:
             n_total, n_conn, pairs = self._tile_traversability_score(undirected_g, polygon)
-            stats["n_total_edges"] = n_total
-            stats["n_connect_edges"] = n_conn
-            stats["connected_pairs"] = " ".join(f"({a},{b})" for a, b in pairs)
+            stats['n_total_edges'] = n_total
+            stats['n_connect_edges'] = n_conn
+            stats['connected_pairs'] = ' '.join(f'({a},{b})' for a, b in pairs)
         except Exception:
-            stats["n_total_edges"] = -99.99
-            stats["n_connect_edges"] = -99.99
-            stats["connected_pairs"] = "-99.99"
+            stats['n_total_edges'] = -99.99
+            stats['n_connect_edges'] = -99.99
+            stats['connected_pairs'] = '-99.99'
         try:
             tp, fp = self._compute_f1(gdf, gdf_gt)
             _, fn = self._compute_f1(gdf_gt, gdf)
-            stats.update({"tp": tp, "fp": fp, "fn": fn})
+            stats.update({'tp': tp, 'fp': fp, 'fn': fn})
         except Exception:
-            stats.update({"tp": -99.99, "fp": -99.99, "fn": -99.99})
+            stats.update({'tp': -99.99, 'fp': -99.99, 'fn': -99.99})
         return stats
 
     def _get_node_stats(
@@ -463,9 +463,9 @@ class GeoStatsEvaluator:
         try:
             tp, fp = self._compute_f1_point_distance(gdf, gdf_gt, dist_thres=self.e_threshold)
             _, fn = self._compute_f1_point_distance(gdf_gt, gdf, dist_thres=self.e_threshold)
-            stats.update({"tp": tp, "fp": fp, "fn": fn})
+            stats.update({'tp': tp, 'fp': fp, 'fn': fn})
         except Exception:
-            stats.update({"tp": -99.99, "fp": -99.99, "fn": -99.99})
+            stats.update({'tp': -99.99, 'fp': -99.99, 'fn': -99.99})
         return stats
 
     def _compute_edge_score(self, feature, gdf, gdf_gt):
@@ -481,26 +481,26 @@ class GeoStatsEvaluator:
             # Return exactly the columns declared in meta, plus geometry
             return pd.Series(
                 {
-                    "geometry": feature.geometry,
-                    "total_edges": float(m["n_total_edges"]),
-                    "connect_edges": float(m["n_connect_edges"]),
-                    "connected_pairs": m["connected_pairs"],
-                    "tp": float(m["tp"]),
-                    "fp": float(m["fp"]),
-                    "fn": float(m["fn"]),
+                    'geometry': feature.geometry,
+                    'total_edges': float(m['n_total_edges']),
+                    'connect_edges': float(m['n_connect_edges']),
+                    'connected_pairs': m['connected_pairs'],
+                    'tp': float(m['tp']),
+                    'fp': float(m['fp']),
+                    'fn': float(m['fn']),
                 }
             )
 
         # If not a polygon, still return the expected keys with nan/empty
         return pd.Series(
             {
-                "geometry": feature.geometry,
-                "total_edges": np.nan,
-                "connect_edges": np.nan,
-                "connected_pairs": None,
-                "tp": np.nan,
-                "fp": np.nan,
-                "fn": np.nan,
+                'geometry': feature.geometry,
+                'total_edges': np.nan,
+                'connect_edges': np.nan,
+                'connected_pairs': None,
+                'tp': np.nan,
+                'fp': np.nan,
+                'fn': np.nan,
             }
         )
 
@@ -515,13 +515,13 @@ class GeoStatsEvaluator:
             m = self._get_node_stats(poly, G, cropped, cropped_gt)
             return pd.Series(
                 {
-                    "geometry": feature.geometry,
-                    "tp": float(m["tp"]),
-                    "fp": float(m["fp"]),
-                    "fn": float(m["fn"]),
+                    'geometry': feature.geometry,
+                    'tp': float(m['tp']),
+                    'fp': float(m['fp']),
+                    'fn': float(m['fn']),
                 }
             )
-        return pd.Series({"geometry": feature.geometry, "tp": np.nan, "fp": np.nan, "fn": np.nan})
+        return pd.Series({'geometry': feature.geometry, 'tp': np.nan, 'fp': np.nan, 'fn': np.nan})
 
     def _join_curb_to_edges(
         self, curb_gdf: gpd.GeoDataFrame, nodes_gdf: gpd.GeoDataFrame, edges_gdf: gpd.GeoDataFrame
@@ -530,22 +530,22 @@ class GeoStatsEvaluator:
         Build curb-link nodes by joining curb nodes to edges on both directions.
         Requires columns: _id (nodes), _u_id/_v_id (edges). Keeps last geometry column.
         """
-        fwd = pd.merge(curb_gdf, edges_gdf, left_on="_id", right_on="_u_id")
-        fwd = pd.merge(fwd, nodes_gdf, left_on="_v_id", right_on="_id", suffixes=("", "_matched"))
+        fwd = pd.merge(curb_gdf, edges_gdf, left_on='_id', right_on='_u_id')
+        fwd = pd.merge(fwd, nodes_gdf, left_on='_v_id', right_on='_id', suffixes=('', '_matched'))
 
-        rev = pd.merge(curb_gdf, edges_gdf, left_on="_id", right_on="_v_id")
-        rev = pd.merge(rev, nodes_gdf, left_on="_u_id", right_on="_id", suffixes=("", "_matched"))
+        rev = pd.merge(curb_gdf, edges_gdf, left_on='_id', right_on='_v_id')
+        rev = pd.merge(rev, nodes_gdf, left_on='_u_id', right_on='_id', suffixes=('', '_matched'))
 
         curb_link = pd.concat([fwd, rev], ignore_index=True)
 
         # pick a single geometry column
-        geom_cols = [c for c in curb_link.columns if c.startswith("geometry")]
+        geom_cols = [c for c in curb_link.columns if c.startswith('geometry')]
         if len(geom_cols) > 1:
             active = geom_cols[-1]
-            curb_link = curb_link.drop([c for c in geom_cols[:-1]], axis=1).rename(columns={active: "geometry"})
+            curb_link = curb_link.drop([c for c in geom_cols[:-1]], axis=1).rename(columns={active: 'geometry'})
 
-        return gpd.GeoDataFrame(curb_link, geometry="geometry", crs=curb_gdf.crs)
+        return gpd.GeoDataFrame(curb_link, geometry='geometry', crs=curb_gdf.crs)
 
     @staticmethod
     def _summary_dict(precision: float, recall: float, f1: float) -> Dict[str, float]:
-        return {"precision": precision, "recall": recall, "f1": f1}
+        return {'precision': precision, 'recall': recall, 'f1': f1}

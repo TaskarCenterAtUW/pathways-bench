@@ -20,16 +20,9 @@ def evaluate_test():
         output=OUTPUT_DIR
     )
     results = pathways_bench.stats()
-    print('-------')
     print(results)
 
 
 if __name__ == '__main__':
 
     evaluate_test()
-    # print(f'{os.path.join(AI_OUT_DIR, AI_FILE)}')
-    # print(AREA_FILE)
-
-    # TIP -  /Users/anuj/Work/Gaussian/pathways-bench/output/auburn.edges_tip.geojson
-    # GT-  /Users/anuj/Work/Gaussian/pathways-bench/tests/assets/gt/auburn.edges.geojson
-    # PRED-  /Users/anuj/Work/Gaussian/pathways-bench/tests/assets/predictions/auburn.graph.edges.OSW.geojson

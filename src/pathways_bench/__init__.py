@@ -3,7 +3,7 @@ from .version import __version__
 
 from .helpers import MetricsHelper
 from .geo_evaluator import GeoStatsEvaluator
-from .stats import ScoreReporter
+from .score_reporter import ScoreReporter
 
 
 class PathwaysBench:
@@ -61,6 +61,16 @@ class PathwaysBench:
             use_pygeos=self.use_pygeos
         )
         result = statistic.run()
+
+        try:
+            scores_path = statistic.save_scores_geojson()
+            if scores_path:
+                # optionally expose this path in the return payload
+                result = dict(result)
+                result['scores_path'] = scores_path
+        except Exception:
+            # never let score-writing break the summary call
+            pass
         return result
 
 
